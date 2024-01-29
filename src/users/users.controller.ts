@@ -21,17 +21,25 @@ import { TransformInterceptor } from 'src/response-type/response-type.intercepto
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  @ApiOperation({ summary: '사용자 목록 조회' })
+  //* 사용자 탈퇴
+  @Patch('/withdraw')
+  @ApiOperation({ summary: '사용자 탈퇴' })
   @ApiResponse({
-    status: 200,
-    description: '사용자 목록 조회',
-    type: Array<User>,
+    status: 204,
+    description: '사용자 탈퇴',
   })
-  async getUserAll(): Promise<User[]> {
-    return await this.userService.getUserAll();
-  }
+  withdraw() {}
 
+  //* 사용자 삭제
+  @Delete('/delete')
+  @ApiOperation({ summary: '사용자 삭제' })
+  @ApiResponse({
+    status: 204,
+    description: '사용자 삭제',
+  })
+  deleteUser() {}
+
+  //* 이메일 중복 확인
   @Get('check-email')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '이메일 중복 확인' })
@@ -40,6 +48,7 @@ export class UsersController {
     return { result };
   }
 
+  //* 닉네임 중복 확인
   @Get('check-nickname')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '닉네임 중복 확인' })
@@ -48,6 +57,7 @@ export class UsersController {
     return { result };
   }
 
+  //* 비밀번호 재설정
   @Patch('reset-password')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '비밀번호 재설정' })
@@ -59,6 +69,20 @@ export class UsersController {
     return { result };
   }
 
+  //* 사용자 목록 조회
+  @Get()
+  @ApiOperation({ summary: '사용자 목록 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 목록 조회',
+    type: Array<User>,
+  })
+  async getUserAll(): Promise<object> {
+    const result = await this.userService.getUserAll();
+    return { result };
+  }
+
+  //* 사용자 정보 조회
   @Get('/:id')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '사용자 정보 조회' })
@@ -72,6 +96,7 @@ export class UsersController {
     return await this.userService.getUserById(userId);
   }
 
+  //*사용자 정보 수정
   @Patch('/:id')
   @UseInterceptors(TransformInterceptor)
   async updateUser(

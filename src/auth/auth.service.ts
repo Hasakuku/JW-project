@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -10,7 +11,11 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/users.service';
 import * as nodemailer from 'nodemailer';
 import { User } from 'src/users/entities/user.entity';
-import { authMessage, userMessage } from 'src/response-type/message-type/message-type';
+import {
+  authMessage,
+  userMessage,
+} from 'src/response-type/message-type/message-type';
+import { SendCodeDto } from './dto/send-code.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,10 +39,12 @@ export class AuthService {
     res.redirect('http://localhost:3000');
   }
 
+  //* 회원가입
   async signup(createUserDto: CreateUserDto): Promise<void> {
     await this.userService.createUser(createUserDto);
   }
 
+  //* 로그인
   async login(authCredentialDto: AuthCredentialDto): Promise<string> {
     const { email, password } = authCredentialDto;
     const foundUser = await this.userService.getUserByEmail(email);
@@ -49,10 +56,14 @@ export class AuthService {
     return accessToken;
   }
 
-  async sendCodeEmail(email: string): Promise<void> {
+  //* 이메일 인증 코드 발송
+  async sendCodeEmail(sendCodeEmail: SendCodeDto): Promise<void> {
+    const { email, type } = sendCodeEmail;
     const user = await this.userService.getUserByEmail(email);
-    if (!user) {
-      throw new NotFoundException('User not found');
+    if (user && type === 'signup') {
+      throw new ConflictException(authMessage.SIGNUP_CONFLICT_EMAIL);
+    } else if (!user && type === 'resetPW') {
+      throw new NotFoundException(userMessage.USER_NOTFOUND);
     }
 
     const resetCode = Math.floor(100000 + Math.random() * 900000);
@@ -83,6 +94,7 @@ export class AuthService {
     await transporter.sendMail(mailOptions);
   }
 
+  //* 이메일 인증 확인
   async verifyAuthCode(email: string, code: number): Promise<boolean> {
     const { resetPasswordCode, codeExpirationTime } =
       await this.userService.getUserByEmail(email);

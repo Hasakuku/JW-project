@@ -40,6 +40,7 @@ import {
   Login,
 } from 'src/response-type/response-type-success';
 import { authMessage } from 'src/response-type/message-type/message-type';
+import { SendCodeDto } from './dto/send-code.dto';
 
 interface IOAuthUser {
   user: {
@@ -60,7 +61,7 @@ export class AuthController {
   test(@GetUser() user: User) {
     console.log('req.user:', user);
   }
-
+  //* 회원가입
   @Post('/signup')
   @ApiOperation({ summary: '이메일 가입' })
   @ApiBody({ description: '사용자 등록', type: CreateUserDto })
@@ -72,6 +73,7 @@ export class AuthController {
     return this.authService.signup(createUserDto);
   }
 
+  //* 로그인
   @Post('/login')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '이메일 로그인' })
@@ -106,7 +108,7 @@ export class AuthController {
     res.cookie('jwt', accessToken, { httpOnly: true });
     return { message: authMessage.LOGIN_SUCCESS };
   }
-
+  //*카카오 로그인
   @Get('/kakao/login')
   @UseGuards(AuthGuard('kakao'))
   async loginKakao(
@@ -116,6 +118,7 @@ export class AuthController {
     this.authService.OAuthLogin({ req, res });
   }
 
+  //*로그 아웃
   @Delete('/logout')
   // @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '로그 아웃' })
@@ -130,34 +133,41 @@ export class AuthController {
     res.sendStatus(204);
   }
 
-  @Patch('/withdraw')
-  @ApiOperation({ summary: '사용자 탈퇴' })
-  @ApiResponse({
-    status: 204,
-    description: '사용자 탈퇴',
-  })
-  withdraw() {}
-
-  @Delete('/delete')
-  @ApiOperation({ summary: '사용자 삭제' })
-  @ApiResponse({
-    status: 204,
-    description: '사용자 삭제',
-  })
-  deleteUser() {}
-
+  //* 이메일 인증 코드 발송
   @Post('send-code')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '인증 코드 발송' })
+  @ApiBody({
+    type: SendCodeDto,
+    description: '이메일 인증 코드 발송',
+    examples: {
+      '회원가입 코드 발송': {
+        summary: '회원가입을 위한 이메일 인증 코드 발송',
+        value: {
+          email: 'user@test.com',
+          type: 'signup',
+        },
+      },
+      '비밀번호 재설정 코드 발송': {
+        summary: '비밀번호 재설정을 위한 이메일 인증 코드 발송',
+        value: {
+          email: 'user@test.com',
+          type: 'resetPW',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 201,
     description: authMessage.CODE_SEND_SUCCESS,
     type: CodeSend,
   })
-  async sendCodeEmail(@Body('email') email: string): Promise<object> {
-    await this.authService.sendCodeEmail(email);
+  async sendCodeEmail(@Body() sendCodeEmail: SendCodeDto): Promise<object> {
+    await this.authService.sendCodeEmail(sendCodeEmail);
     return { message: authMessage.CODE_SEND_SUCCESS };
   }
+
+  //* 이메일 인증 확인
   @Get('auth-code')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '코드 인증' })
