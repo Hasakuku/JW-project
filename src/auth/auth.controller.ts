@@ -171,6 +171,19 @@ export class AuthController {
   @Get('auth-code')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '코드 인증' })
+  @ApiBody({
+    type: SendCodeDto,
+    description: '코드 인증',
+    examples: {
+      '코드 인증': {
+        summary: '코드 인증',
+        value: {
+          email: 'user@test.com',
+          code: '123456',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: '코드 인증 완료',
