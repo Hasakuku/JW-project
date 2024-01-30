@@ -93,9 +93,9 @@ export class AuthService {
     if (type === 'signup' && user) {
       throw new ConflictException(authMessage.SIGNUP_CONFLICT_EMAIL);
     }
-    // if (type === 'resetPW' && !user) {
-    //   throw new NotFoundException(userMessage.USER_NOTFOUND);
-    // }
+    if (type === 'resetPW' && !user) {
+      throw new NotFoundException(userMessage.USER_NOTFOUND);
+    }
 
     const resetCode = Math.floor(100000 + Math.random() * 900000);
     const codeExpirationTime = new Date();
@@ -119,7 +119,7 @@ export class AuthService {
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
-      subject: 'Password Reset',
+      subject: 'Auth Code',
       text: `Auth Code: ${resetCode} \n CodeExpirationTime: ${setCodeExpirationTime}`,
     };
 
