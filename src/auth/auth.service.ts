@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -91,7 +92,8 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(email);
     if (user && type === 'signup') {
       throw new ConflictException(authMessage.SIGNUP_CONFLICT_EMAIL);
-    } else if (!user && type === 'resetPW') {
+    }
+    if (!user && type === 'resetPW') {
       throw new NotFoundException(userMessage.USER_NOTFOUND);
     }
 
