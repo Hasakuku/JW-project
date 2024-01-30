@@ -65,11 +65,23 @@ export class AuthService {
     code: number,
     expirationTime: Date,
   ): Promise<void> {
+    // 기존에 같은 이메일에 대한 코드가 있는지 확인
+    const existingCode = await this.entityManager.findOneBy(AuthCode, {
+      email,
+    });
+
+    // 기존 코드가 있다면 삭제
+    if (existingCode) {
+      await this.entityManager.delete(AuthCode, { email });
+    }
+
+    // 새로운 코드 생성
     const authCode = new AuthCode();
     authCode.email = email;
     authCode.code = code;
     authCode.expirationTime = expirationTime;
 
+    // 새로운 코드 저장
     await this.entityManager.save(authCode);
   }
 
@@ -114,7 +126,11 @@ export class AuthService {
 
   //* 이메일 인증 확인
   async verifyAuthCode(email: string, code: number): Promise<boolean> {
-    const authCode = await this.entityManager.findOneBy(AuthCode, { email });
+    const authCode = await this.entityManager
+      .createQueryBuilder(AuthCode, 'authCode')
+      .where('authCode.email = :email', { email })
+      .orderBy('authCode.expirationTime', 'DESC')
+      .getOne();
     if (!authCode) {
       throw new NotFoundException(authMessage.EMAIL_NOTFOUND);
     }
@@ -123,7 +139,7 @@ export class AuthService {
       throw new UnauthorizedException(authMessage.CODE_EXPIRED);
     }
 
-    if (authCode.code !== code) {
+    if (authCode.code !== Number(code)) {
       throw new UnauthorizedException(authMessage.CODE_UNAUTHORIZED);
     }
 

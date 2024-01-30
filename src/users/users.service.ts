@@ -89,7 +89,7 @@ export class UserService {
   async updatePassword(
     email: string,
     newPassword: string,
-    codeExpirationTime?: Date,
+    // codeExpirationTime?: Date,
   ): Promise<boolean> {
     const user = await this.entityManager.findOneBy(User, { email });
     if (!user) {
@@ -97,8 +97,8 @@ export class UserService {
     }
 
     user.password = await user.setPassword(newPassword);
-    user.resetPasswordCode = null; // Clear the reset token
-    user.codeExpirationTime = codeExpirationTime ?? null;
+    // user.resetPasswordCode = null; // Clear the reset token
+    // user.codeExpirationTime = codeExpirationTime ?? null;
     const result = await this.entityManager.save(user);
 
     return !!result;

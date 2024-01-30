@@ -20,6 +20,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -171,19 +172,8 @@ export class AuthController {
   @Get('auth-code')
   @UseInterceptors(TransformInterceptor)
   @ApiOperation({ summary: '코드 인증' })
-  @ApiBody({
-    type: SendCodeDto,
-    description: '코드 인증',
-    examples: {
-      '코드 인증': {
-        summary: '코드 인증',
-        value: {
-          email: 'user@test.com',
-          code: '123456',
-        },
-      },
-    },
-  })
+  @ApiQuery({ name: 'email', type: String, example: 'user@test.com' })
+  @ApiQuery({ name: 'code', type: Number, example: '123456' })
   @ApiResponse({
     status: 200,
     description: '코드 인증 완료',
@@ -195,8 +185,8 @@ export class AuthController {
     type: CodeUnauthorized,
   })
   async verifyAuthCode(
-    @Body('email') email: string,
-    @Body('code') code: number,
+    @Query('email') email: string,
+    @Query('code') code: number,
   ): Promise<object> {
     const result = await this.authService.verifyAuthCode(email, code);
     return { result };
