@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -16,12 +17,14 @@ import {
   userMessage,
 } from 'src/response-type/message-type/message-type';
 import { SendCodeDto } from './dto/send-code.dto';
-
+import { EntityManager } from 'typeorm';
+import { AuthCode } from './entities/auth-code.entity';
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private entityManager: EntityManager,
   ) {}
 
   async OAuthLogin({ req, res }) {
@@ -56,6 +59,20 @@ export class AuthService {
     return accessToken;
   }
 
+  //* 인증코드 생성
+  async createAuthCode(
+    email: string,
+    code: number,
+    expirationTime: Date,
+  ): Promise<void> {
+    const authCode = new AuthCode();
+    authCode.email = email;
+    authCode.code = code;
+    authCode.expirationTime = expirationTime;
+
+    await this.entityManager.save(authCode);
+  }
+
   //* 이메일 인증 코드 발송
   async sendCodeEmail(sendCodeEmail: SendCodeDto): Promise<void> {
     const { email, type } = sendCodeEmail;
@@ -70,11 +87,12 @@ export class AuthService {
     const codeExpirationTime = new Date();
     const setCodeExpirationTime = new Date(codeExpirationTime);
     setCodeExpirationTime.setMinutes(codeExpirationTime.getMinutes() + 3);
-    await this.userService.setResetCode(
-      email,
-      resetCode,
-      setCodeExpirationTime,
-    );
+    // await this.userService.setResetCode(
+    //   email,
+    //   resetCode,
+    //   setCodeExpirationTime,
+    // );
+    await this.createAuthCode(email, resetCode, setCodeExpirationTime);
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -96,17 +114,16 @@ export class AuthService {
 
   //* 이메일 인증 확인
   async verifyAuthCode(email: string, code: number): Promise<boolean> {
-    const { resetPasswordCode, codeExpirationTime } =
-      await this.userService.getUserByEmail(email);
-    if (!resetPasswordCode) {
-      throw new NotFoundException(userMessage.USER_NOTFOUND);
+    const authCode = await this.entityManager.findOneBy(AuthCode, { email });
+    if (!authCode) {
+      throw new NotFoundException(authMessage.EMAIL_NOTFOUND);
     }
 
-    if (new Date() > codeExpirationTime) {
+    if (new Date() > authCode.expirationTime) {
       throw new UnauthorizedException(authMessage.CODE_EXPIRED);
     }
 
-    if (resetPasswordCode !== code) {
+    if (authCode.code !== code) {
       throw new UnauthorizedException(authMessage.CODE_UNAUTHORIZED);
     }
 
