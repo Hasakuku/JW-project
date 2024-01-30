@@ -90,10 +90,10 @@ export class AuthService {
   async sendCodeEmail(sendCodeEmail: SendCodeDto): Promise<void> {
     const { email, type } = sendCodeEmail;
     const user = await this.userService.getUserByEmail(email);
-    if (user && type === 'signup') {
+    if (type === 'signup' && user) {
       throw new ConflictException(authMessage.SIGNUP_CONFLICT_EMAIL);
     }
-    if (!user && type === 'resetPW') {
+    if (type === 'resetPW' && !user) {
       throw new NotFoundException(userMessage.USER_NOTFOUND);
     }
 
