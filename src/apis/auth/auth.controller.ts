@@ -77,7 +77,7 @@ export class AuthController {
   })
   async signup(@Body() createUserDto: CreateUserDto): Promise<object> {
     this.authService.signup(createUserDto);
-    return { message: authMessage.LOGIN_SUCCESS };
+    return { message: authMessage.SIGNUP_SUCCESS };
   }
 
   //* 로그인
