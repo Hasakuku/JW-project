@@ -24,6 +24,7 @@ export enum Provider {
 }
 
 export enum InterestCategory {
+  DEFAULT = 'default',
   CULTURE = 'culture', //문화예술
   FOOD = 'food', // 음식
   SPORTS = 'sports', // 스포츠
@@ -85,14 +86,6 @@ export class User extends BaseEntity {
   @ApiProperty()
   @DeleteDateColumn()
   deleted_at?: Date;
-
-  // @ApiProperty()
-  // @Column({ nullable: true })
-  // resetPasswordCode: number;
-
-  // @ApiProperty()
-  // @Column({ nullable: true })
-  // codeExpirationTime: Date;
 
   private static async hashPassword(password: string): Promise<string> {
     return await crypto.createHash('sha1').update(password).digest('hex');

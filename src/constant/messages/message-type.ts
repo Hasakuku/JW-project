@@ -24,3 +24,9 @@ export const userMessage = {
   EMAIL_VERIFIED: '이메일이 성공적으로 인증되었습니다.',
   EMAIL_NOTFOUND: '이메일을 찾을 수 없습니다.',
 };
+
+export const checkMessage = {
+  IS_STRING: '문자열이 아닙니다.',
+  IS_NOT_EMPTY: '입력값이 필요합니다.',
+  IS_ENUM: '지정된 값이 아닙니다.',
+};

@@ -22,16 +22,9 @@ export class UserService {
     const existingUser = await this.entityManager.findOneBy(User, { email });
     if (existingUser)
       throw new ConflictException(authMessage.SIGNUP_CONFLICT_EMAIL);
-
     const user = new User();
-    user.username = rest.username;
-    user.nickname = rest.nickname;
-    user.email = email;
+    Object.assign(user, { email, ...rest });
     await user.setPassword(password);
-    user.gender = rest.gender;
-    user.provider = rest.provider;
-    user.profileImage = rest.profileImage;
-    user.interestCategory = rest.interestCategory;
 
     await this.entityManager.save(user);
   }
@@ -56,17 +49,6 @@ export class UserService {
     await this.entityManager.save(user);
     return user;
   }
-
-  // async setResetCode(email: string): Promise<void> {
-  //   const user = await this.entityManager.findOneBy(User, { email });
-  //   if (!user) {
-  //     throw new NotFoundException(userMessage.USER_NOTFOUND);
-  //   }
-
-  //   // user.resetPasswordCode = resetCode;
-  //   // user.codeExpirationTime = setCodeExpirationTime;
-  //   await this.entityManager.save(user);
-  // }
 
   async updatePassword(
     email: string,

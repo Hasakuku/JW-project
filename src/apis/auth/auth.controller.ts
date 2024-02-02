@@ -36,6 +36,7 @@ import {
 import { authMessage } from 'src/constant/messages/message-type';
 import { SendCodeDto } from './dto/send-code.dto';
 import { LoginUnauthorized } from 'src/constant/swagger/response-type-404';
+import { KakaoAuthGuard } from './auth.guard';
 
 interface IOAuthUser {
   user: {
@@ -50,12 +51,22 @@ interface IOAuthUser {
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+  // @Get('/kakao/redirect')
+  // async redirectKakao(@Res() res: Response) {
+  //   const redirectUri =
+  //     'https://kauth.kakao.com/oauth/authorize?client_id=3f9afa0045d4d2e28e15fe477c6f683a&redirect_uri=http://localhost:3000/api/v1/auth/kakao/login&response_type=code&scope=profile_nickname,account_email';
+  //   res.redirect(redirectUri);
+  // }
 
-  @Post('/test')
-  @UseGuards(AuthGuard())
-  test(@GetUser() user: User) {
-    console.log('req.user:', user);
-  }
+  //*카카오 로그인
+  @UseGuards(KakaoAuthGuard)
+  @Get('/kakao/login')
+  async kakaoLogin(): Promise<void> {}
+  // // @UseGuards(AuthGuard('kakao'))
+  // async loginKakao(@Query() code: string) {
+  //   console.log(code);
+  // }
+
   //* 회원가입
   @Post('/signup')
   @ApiOperation({ summary: '이메일 가입' })
@@ -102,15 +113,6 @@ export class AuthController {
     const accessToken = await this.authService.login(authCredentialDto);
     res.cookie('jwt', accessToken, { httpOnly: true });
     return { message: authMessage.LOGIN_SUCCESS };
-  }
-  //*카카오 로그인
-  @Get('/kakao/login')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    this.authService.OAuthLogin({ req, res });
   }
 
   //*로그 아웃
