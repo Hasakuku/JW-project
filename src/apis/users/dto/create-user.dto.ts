@@ -49,6 +49,6 @@ export class CreateUserDto {
   profileImage?: string;
 
   @ApiProperty({ example: 'culture' })
-  @IsEnum(InterestCategory)
+  @IsEnum(InterestCategory, { each: true })
   interestCategory: InterestCategory[];
 }

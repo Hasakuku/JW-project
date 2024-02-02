@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
 import * as crypto from 'crypto';
 import {
   BaseEntity,
@@ -69,7 +70,8 @@ export class User extends BaseEntity {
   profileImage?: string;
 
   @ApiProperty()
-  @Column('simple-array')
+  // @IsEnum(InterestCategory, { each: true })
+  @Column({ type: 'enum', enum: Gender })
   interestCategory: InterestCategory[];
 
   @Column({ type: 'boolean', default: false })
