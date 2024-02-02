@@ -25,7 +25,6 @@ export class UserService {
     const user = new User();
     Object.assign(user, { email, ...rest });
     await user.setPassword(password);
-    console.log(user)
     await this.entityManager.save(user);
   }
 

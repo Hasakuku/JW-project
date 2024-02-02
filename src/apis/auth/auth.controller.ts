@@ -75,8 +75,9 @@ export class AuthController {
     status: 201,
     description: '사용자 등록',
   })
-  signup(@Body() createUserDto: CreateUserDto): Promise<void> {
-    return this.authService.signup(createUserDto);
+  async signup(@Body() createUserDto: CreateUserDto): Promise<object> {
+    this.authService.signup(createUserDto);
+    return { message: authMessage.LOGIN_SUCCESS };
   }
 
   //* 로그인

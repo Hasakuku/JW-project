@@ -69,8 +69,8 @@ export class User extends BaseEntity {
   profileImage?: string;
 
   @ApiProperty()
-  @Column({ type: 'enum', enum: InterestCategory })
-  interestCategory: InterestCategory;
+  @Column('simple-array')
+  interestCategory: InterestCategory[];
 
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean;

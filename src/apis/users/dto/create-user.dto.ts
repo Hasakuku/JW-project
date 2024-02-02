@@ -50,5 +50,5 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'culture' })
   @IsEnum(InterestCategory)
-  interestCategory: InterestCategory;
+  interestCategory: InterestCategory[];
 }
