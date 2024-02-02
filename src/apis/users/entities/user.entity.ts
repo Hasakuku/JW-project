@@ -71,7 +71,7 @@ export class User extends BaseEntity {
 
   @ApiProperty()
   // @IsEnum(InterestCategory, { each: true })
-  @Column({ type: 'enum', enum: Gender })
+  @Column('simple-array')
   interestCategory: InterestCategory[];
 
   @Column({ type: 'boolean', default: false })
